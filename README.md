@@ -1,4 +1,4 @@
-# vitest-tab-manager
+# "Close duplicate dabs"
 
 POC browser extension that deduplicates vitest-ui tabs.
 

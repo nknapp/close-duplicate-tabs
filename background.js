@@ -5,8 +5,7 @@ const singletonTabUrlPrefixes = {
 };
 
 
-// This function checks for Vitest UI tabs and closes extras
-async function manageTabsOfUrlPrefix(urlPrefix) {
+async function closeAllButOldestTab(urlPrefix) {
     const tabs = await chrome.tabs.query({})
     const matchingTabs = tabs.filter(tab => tab.url.startsWith(urlPrefix))
     if (matchingTabs.length === 0) return null
@@ -28,10 +27,10 @@ async function manageTabsOfUrlPrefix(urlPrefix) {
     return { retainTabId: oldestTab.id }
 }
 
-async function manageSingletonTabs() {
+async function closeDuplicateTabs() {
     let counter = 0
     for (const urlPrefix of Object.values(singletonTabUrlPrefixes)) {
-        const result =  await manageTabsOfUrlPrefix(urlPrefix)
+        const result =  await closeAllButOldestTab(urlPrefix)
         if (result != null) {
             chrome.tabs.move(result.retainTabId, { index: counter++ })
         }
@@ -39,13 +38,14 @@ async function manageSingletonTabs() {
 }
 
 
+function closeDuplicateTabsAndLogError() {
+    closeDuplicateTabs().catch(error => console.error("Error managing vitest-ui tabs", error))
+}
+
 chrome.tabs.onCreated.addListener(async (tab) => {
-    // Add a small delay to allow potential processing of the new tab
-    setTimeout(() => {
-        manageSingletonTabs().catch(error => console.error("Error managing vitest-ui tabs", error))
-    }, 1000); // Adjust delay as needed (in milliseconds)
+    // The url of the new tab will only be visible after a small delay, so we wait some time
+    // here before we process the tabs
+    setTimeout(closeDuplicateTabsAndLogError, 1000);
 });
 
-setTimeout(() => {
-    manageSingletonTabs().catch(error => console.error("Error managing vitest-ui tabs", error))
-}, 1000)
+setTimeout(closeDuplicateTabsAndLogError, 1000);

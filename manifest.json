@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Vitest Tab Manager",
+  "name": "Close duplicate tabs",
   "version": "1.0",
-  "description": "Manages open Vitest UI tabs",
+  "description": "Closes duplicate tabs, e.g. tabs that are opened though CLI programs, such as vitest-ui",
   "background": {
     "service_worker": "background.js"
   },
